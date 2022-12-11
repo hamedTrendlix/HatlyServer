@@ -43,5 +43,5 @@ app.use(errorMiddleWare);
 
 
 app.listen(process.env.PORT, () => {
-  console.log("server start on 8000");
+  console.log("server start on " + process.env.port);
 });
