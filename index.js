@@ -23,7 +23,7 @@ connectDatabase()
 const app = express();
 
 // 
-app.use(cors({credentials : true , origin : ['http://localhost:3000' , 'https://hatly-store.vercel.app/']}));
+app.use(cors({credentials : true , origin : ['http://localhost:3000' , 'https://hatly-store.vercel.app' , 'https://hatlytest.trendlix.com']}));
 app.use(express.json());
 app.use(cookieParser());
 
