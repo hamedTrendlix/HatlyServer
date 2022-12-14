@@ -10,16 +10,16 @@ const sendToken = async(user, statusCode, res) => {
       Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
-    // secure: false,
+    secure: true,
     path : '/',
-    sameSite : 'strict'
+    sameSite : 'lax'
   };
   user.tokens = null
   user.password = null
   user.resetLink = null
   res.status(statusCode).cookie("access_token", token, options).json({
     success: true,
-    body:user,
+    user,
     token,
   });
   console.log(1)
