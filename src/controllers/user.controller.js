@@ -2,7 +2,7 @@ const db = require("../database");
 const jwt = require('jsonwebtoken')
 const bcryptjs = require('bcryptjs')
 const User = require('../models/userModel');
-const auth = require('../middleware/userAuth');
+// const auth = require('../middleware/userAuth');
 const ServerError = require('../utils/ErrorInterface');
 const ApiFeatures = require('../utils/apiFeatures');
 const sendToken = require("../utils/jwtToken");
@@ -208,6 +208,18 @@ const getUserInfo = async (req, res, next) => {
     })
   } catch (e) {
     next(e);
+  }
+}
+
+const auth = async(req,res,next)=>{
+  try {
+    res.status(200).json({
+      ok: true,
+      code: 200,
+      message: 'succeeded',
+    })
+  } catch (e) {
+    next(e)
   }
 }
 
@@ -462,4 +474,5 @@ module.exports = {
   login,
   logout,
   getUserInfo,
+  auth,
 }
