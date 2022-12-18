@@ -12,7 +12,7 @@ const sendToken = async(user, statusCode, res) => {
     httpOnly: true,
     // secure: true,
     path : '/',
-    sameSite : 'strict',
+    sameSite : 'lax',
   };
   user.tokens = null
   user.password = null

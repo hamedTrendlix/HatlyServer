@@ -92,7 +92,7 @@ const login = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
-    const notAllowedUpdates = ['status', 'role', 'tokens', 'balance', 'password', 'updatedAt', '_id', 'createdAt', 'resetLink',];
+    const notAllowedUpdates = ['status', 'tokens', 'image', 'balance', 'password', 'updatedAt', '_id', 'createdAt', 'resetLink',];
     const inValidUpdates = updates.filter(el => notAllowedUpdates.includes(el))
     if (inValidUpdates.length > 0) {
       return next(ServerError.badRequest(401, `not allowed to update (${inValidUpdates.join(', ')})`))
@@ -100,6 +100,17 @@ const updateUser = async (req, res, next) => {
     const user = await User.findByIdAndUpdate(req.user.id, req.body, {
       new: true,
       runValidators: true,
+    })
+    const sql = `UPDATE tabCustomer SET customer_name = ?,email_id = ?,mobile_no = ?, customer_primary_contact = ?  ;`
+    const erpUser = db.query(sql, [
+      `${user.firstName} ${user.lastName}`,
+      user.email,
+      user.phone,
+      user.phone,
+      
+    ], (err, result) => {
+      if (err)
+        console.log(err)
     })
     await user.save();
     res.status(200).json({
