@@ -107,7 +107,7 @@ const updateUser = async (req, res, next) => {
       user.email,
       user.phone,
       user.phone,
-      
+
     ], (err, result) => {
       if (err)
         console.log(err)
@@ -379,7 +379,13 @@ const logout = async (req, res, next) => {
     //   httpOnly: true,
     // });
     await req.user.save();
-    res.status(200).clearCookie('access_token').json({
+    res.status(200).clearCookie('access_token',{
+      httpOnly: true,
+      secure: true,
+      path : '/',
+      domain: '.trendlix.com',
+      sameSite : 'none',
+    }).json({
       ok: true,
       code: 200,
       message: 'succeeded',
