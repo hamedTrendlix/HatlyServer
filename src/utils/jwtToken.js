@@ -13,7 +13,7 @@ const sendToken = async(user, statusCode, res) => {
     secure: true,
     path : '/',
     domain: '.trendlix.com',
-    sameSite : 'none',
+    sameSite : 'strict',
   };
   user.tokens = null
   user.password = null
