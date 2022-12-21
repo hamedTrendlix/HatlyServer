@@ -10,7 +10,7 @@ routes.route('/logout' ).get(authUser, userController.logout)
 routes.route('/me' ).get(authUser, userController.getUserInfo)
 routes.route('/auth' ).get(authUser, userController.auth)
 
-routes.route('/').post(userController.addUser);
+routes.route('/').post(userController.addUser).patch(authUser ,userController.updateUser);
 
 
 module.exports = routes;

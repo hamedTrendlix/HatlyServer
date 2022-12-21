@@ -68,7 +68,7 @@ const signup = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body
-    console.log(email,password)
+    console.log(email, password)
     // console.log(req.body)
     // console.log(email)
     // console.log(password)
@@ -101,17 +101,17 @@ const updateUser = async (req, res, next) => {
       new: true,
       runValidators: true,
     })
-    const sql = `UPDATE tabCustomer SET customer_name = ?,email_id = ?,mobile_no = ?, customer_primary_contact = ?  ;`
-    const erpUser = db.query(sql, [
-      `${user.firstName} ${user.lastName}`,
-      user.email,
-      user.phone,
-      user.phone,
+    // const sql = `UPDATE tabCustomer SET customer_name = ?,email_id = ?,mobile_no = ?, customer_primary_contact = ?  ;`
+    // const erpUser = db.query(sql, [
+    //   `${user.firstName} ${user.lastName}`,
+    //   user.email,
+    //   user.phone,
+    //   user.phone,
 
-    ], (err, result) => {
-      if (err)
-        console.log(err)
-    })
+    // ], (err, result) => {
+    //   if (err)
+    //     console.log(err)
+    // })
     await user.save();
     res.status(200).json({
       ok: true,
@@ -204,7 +204,7 @@ const updateUser = async (req, res, next) => {
 
 const getUserInfo = async (req, res, next) => {
   try {
-    const user = {...req.user._doc};
+    const user = { ...req.user._doc };
     delete user.tokens
     delete user.password
     delete user.resetLink
@@ -222,7 +222,7 @@ const getUserInfo = async (req, res, next) => {
   }
 }
 
-const auth = async(req,res,next)=>{
+const auth = async (req, res, next) => {
   try {
     res.status(200).json({
       ok: true,
@@ -379,12 +379,12 @@ const logout = async (req, res, next) => {
     //   httpOnly: true,
     // });
     await req.user.save();
-    res.status(200).clearCookie('access_token',{
+    res.status(200).clearCookie('access_token', {
       httpOnly: true,
       secure: true,
-      path : '/',
+      path: '/',
       domain: '.trendlix.com',
-      sameSite : 'none',
+      sameSite: 'none',
     }).json({
       ok: true,
       code: 200,
@@ -491,5 +491,6 @@ module.exports = {
   login,
   logout,
   getUserInfo,
+  updateUser,
   auth,
 }

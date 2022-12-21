@@ -11,11 +11,13 @@ exports.authUser = async (req, res, next) => {
     }
 
     const decodedData = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decodedData)
+    console.log(token)
     const user = await User.findOne({ _id: decodedData.id, tokens: token });
-    if (!user)
+    if (!user) {
+      console.log('error')
       return next(ServerError.badRequest(401, 'Please Login to access this resource'));
-    console.log(user)
+    }
+    console.log('found')
     req.user = user
 
     next();
