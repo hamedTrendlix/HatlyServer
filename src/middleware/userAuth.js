@@ -6,12 +6,13 @@ exports.authUser = async (req, res, next) => {
   try {
 
     const { access_token: token } = req.cookies;
+    // console.log(req.cookies)
     if (!token) {
       return next(ServerError.badRequest(401, 'Please Login to access this resource'));
     }
 
     const decodedData = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(token)
+    // console.log(token)
     const user = await User.findOne({ _id: decodedData.id, tokens: token });
     if (!user) {
       console.log('error')

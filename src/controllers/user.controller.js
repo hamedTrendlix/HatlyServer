@@ -29,14 +29,14 @@ const signup = async (req, res, next) => {
     // save user in database
     await user.save();
     console.log(user.id)
-    console.log(user._id)
+    console.log(user)
     //save user in ERP database
     const sql = `INSERT INTO tabCustomer SET idx = ?,id = ?,name = ?,customer_name = ?,email_id = ?,mobile_no = ?, customer_primary_contact = ? ,language = ?,territory = ? ,customer_group = ?,customer_type = ?,owner = ?,modified_by = ?;`
-    const erpUser = db.query(sql, [
+    const [rows , fields] = await db.query(sql, [
       user.id,
       user.id,
-      `${user.firstName} ${user.lastName}_${Date.now()}`,
-      `${user.firstName} ${user.lastName}`,
+      `${firstName} ${lastName}_${Date.now()}`,
+      `${firstName} ${lastName}`,
       user.email,
       user.phone,
       user.phone,
@@ -46,10 +46,7 @@ const signup = async (req, res, next) => {
       'Individual',
       'admin@hatlystore.com',
       'admin@hatlystore.com',
-    ], (err, result) => {
-      if (err)
-        console.log(err)
-    })
+    ])
     // send response to user;
     sendToken(user, 201, res);
     // res.status(201).json({
@@ -60,6 +57,7 @@ const signup = async (req, res, next) => {
     //   token
     // });
   } catch (e) {
+    console.log(e)
     e.statusCode = 400
     next(e)
   }
@@ -101,17 +99,14 @@ const updateUser = async (req, res, next) => {
       new: true,
       runValidators: true,
     })
-    // const sql = `UPDATE tabCustomer SET customer_name = ?,email_id = ?,mobile_no = ?, customer_primary_contact = ?  ;`
-    // const erpUser = db.query(sql, [
-    //   `${user.firstName} ${user.lastName}`,
-    //   user.email,
-    //   user.phone,
-    //   user.phone,
-
-    // ], (err, result) => {
-    //   if (err)
-    //     console.log(err)
-    // })
+    const sql = `UPDATE tabCustomer SET customer_name = ?,email_id = ?,mobile_no = ?, customer_primary_contact = ? WHERE id = ?;`
+    const erpUser = await db.query(sql, [
+      `${user.firstName} ${user.lastName}`,
+      user.email,
+      user.phone,
+      user.phone,
+      user.id,
+    ])
     await user.save();
     res.status(200).json({
       ok: true,
