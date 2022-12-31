@@ -1,6 +1,11 @@
 const db = require("../database");
-// INSERT INTO `_ce526a619e3f46ae`.`tabSales Order Item` (`name`, `modified_by`, `owner`, `docstatus`, `parent`, `parentfield`, `parenttype`, `idx`, `item_code`, `ensure_delivery_based_on_produced_serial_no`, `item_name`, `item_group`, `brand`, `image`, `qty`, `conversion_factor`, `stock_qty`, `price_list_rate`, `base_price_list_rate`, `rate`, `amount`, `base_rate`, `base_amount`, `net_rate`, `net_amount`, `base_net_rate`, `base_net_amount`) VALUES ('shsy6a6a', 'admin@hatlystore.com', 'admin@hatlystore.com', '1', 'test', 'items', 'Sales Order', '1', 'black shark 5 pro 16+512 black', '0', 'Black Shark 5 Pro  Black', 'Mobiles', 'Xiaomi', '/files/qa.jpg', '1', '1', '1', '18500', '18500', '18500', '18500', '18500', '18500', '18500', '18500', '18500', '18500');
+const { customAlphabet } = require('nanoid');
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 10);
 
+//INSERT INTO `_ce526a619e3f46ae`.`tabSales Order` (`name`, `creation`, `modified`, `modified_by`, `owner`, `docstatus`, `idx`, `title`, `naming_series`, `customer`, `customer_name`, `order_type`, `skip_delivery_note`, `company`, `transaction_date`, `customer_address`, `address_display`, `contact_display`, `contact_phone`, `contact_mobile`, `contact_email`, `shipping_address`, `customer_group`, `territory`, `currency`, `conversion_rate`, `selling_price_list`, `price_list_currency`, `plc_conversion_rate`, `ignore_pricing_rule`, `set_warehouse`, `total_qty`, `base_total`, `base_net_total`, `total`, `net_total`, `base_total_taxes_and_charges`, `total_taxes_and_charges`, `loyalty_points`, `loyalty_amount`, `apply_discount_on`, `base_discount_amount`, `additional_discount_percentage`, `discount_amount`, `base_grand_total`, `base_rounding_adjustment`, `base_rounded_total`, `grand_total`, `rounding_adjustment`, `rounded_total`, `advance_paid`, `payment_terms_template`, `party_account_currency`, `language`, `group_same_items`, `status`, `delivery_status`, `per_delivered`, `per_billed`, `billing_status`, `commission_rate`, `total_commission`, `_seen`, `disable_rounded_total`, `is_internal_customer`, `per_picked`, `amount_eligible_for_commission`) VALUES ('testac70a2', '2022-12-20 14:26:12.405428', '2022-12-20 14:26:12.405428', 'admin@hatlystore.com', 'admin@hatlystore.com', '1', '0', '{customer_name}', 'SAL-ORD-.YYYY.-', 'Hamed Osama_1670419225808', 'Hamed Osama', 'sales', '0', 'HatlyStore', '2022-12-29', '2b ahmed st, helwan, cairo', 'new Cairo<br>new Cairo<br>Cairo<br>', 'Hamed Osama', '01023626494', '01023626494', 'h.osama@trendlix.com', '<br><br>', 'All Customer Groups', 'All Territories', 'EGP', '1.000000000', 'Standard Selling', 'EGP', '1.000000000', '0', 'Stores - H', '1.000000000', '18500.000000000', '18500.000000000', '18500.000000000', '18500.000000000', '50.000000000', '50.000000000', '0', '0', 'Grand Total', '0', '0', '0', '18550.000000000', '0', '18550.000000000', '18550.000000000', '0', '0', '0', 'Cash', 'EGP', 'en', '0', 'To Deliver and Bill', 'Not Delivered', '0', '0', 'Not Billed', '0', '0', '[\"admin@hatlystore.com\"]', '0', '0', '0', '18550.000000000');
+
+// INSERT INTO `_ce526a619e3f46ae`.`tabSales Order Item` (`name`, `modified_by`, `owner`, `docstatus`, `parent`, `parentfield`, `parenttype`, `idx`, `item_code`, `ensure_delivery_based_on_produced_serial_no`, `item_name`, `item_group`, `brand`, `image`, `qty`, `conversion_factor`, `stock_qty`, `price_list_rate`, `base_price_list_rate`, `rate`, `amount`, `base_rate`, `base_amount`, `net_rate`, `net_amount`, `base_net_rate`, `base_net_amount`) VALUES ('shsy6a6a', 'admin@hatlystore.com', 'admin@hatlystore.com', '1', 'test', 'items', 'Sales Order', '1', 'black shark 5 pro 16+512 black', '0', 'Black Shark 5 Pro  Black', 'Mobiles', 'Xiaomi', '/files/qa.jpg', '1', '1', '1', '18500', '18500', '18500', '18500', '18500', '18500', '18500', '18500', '18500', '18500');
 
 // INSERT INTO `_ce526a619e3f46ae`.`tabPayment Schedule` (`name`, `modified_by`, `owner`, `docstatus`, `parent`, `parentfield`, `parenttype`, `idx`, `payment_term`, `invoice_portion`, `payment_amount`, `outstanding`, `base_payment_amount`) VALUES ('testing1', 'admin@hatlystore.com', 'admin@hatlystore.com', '1', 'test', 'payment_schedule', 'Sales Order', '1', 'Valu', '100', '18500.000000000', '18500.000000000', '18500.000000000');
 const addOrder = async (req, res, next) => {
@@ -10,24 +15,143 @@ const addOrder = async (req, res, next) => {
     // const query = `SELECT * From tabCustomer WHERE tabCustomer.id = "${user.id}";`
     // const query = "SELECT * From `_ce526a619e3f46ae`.`tabCustomer` WHERE `tabCustomer`.`id` = '6390931943187d5d22a1e63e';"
     // console.log(query)
-    db.query(
+    // get user from db
+    const [erpUser, ...rest] = await db.query(
       "SELECT * From `tabCustomer` Where `id` = ?;",
       [user.id]
-      , (err, data,x) => {
-        if (err)
-          throw new Error(err.message)
-        console.log(data)
-        // console.log(x)
-        sqlUser = data
-      }
     )
-    console.log(1)
-    console.log(sqlUser)
+    // get user username
+    const username = erpUser[0]?.name;
+    // get data from request body
+    const { userData, orderedItems, totalPrice, delivery, subTotal , paymentMethod } = req.body
+    // generate orderId
+    const orderId = nanoid();
+    // get current Date
+    const date = new Date();
+    // add order
+    const [order, ...orderRest] = await db.query(
+      "INSERT INTO `tabSales Order` (`name`, `creation`, `modified`, `modified_by`, `owner`, `docstatus`, `idx`, `title`, `naming_series`, `customer`, `customer_name`, `order_type`, `skip_delivery_note`, `company`, `transaction_date`, `customer_address`, `address_display`, `contact_display`, `contact_phone`, `contact_mobile`, `contact_email`, `shipping_address`, `customer_group`, `territory`, `currency`, `conversion_rate`, `selling_price_list`, `price_list_currency`, `plc_conversion_rate`, `ignore_pricing_rule`, `set_warehouse`, `total_qty`, `base_total`, `base_net_total`, `total`, `net_total`, `base_total_taxes_and_charges`, `total_taxes_and_charges`, `loyalty_points`, `loyalty_amount`, `apply_discount_on`, `base_discount_amount`, `additional_discount_percentage`, `discount_amount`, `base_grand_total`, `base_rounding_adjustment`, `base_rounded_total`, `grand_total`, `rounding_adjustment`, `rounded_total`, `advance_paid`, `payment_terms_template`, `party_account_currency`, `language`, `group_same_items`, `status`, `delivery_status`, `per_delivered`, `per_billed`, `billing_status`, `commission_rate`, `total_commission`, `_seen`, `disable_rounded_total`, `is_internal_customer`, `per_picked`, `amount_eligible_for_commission`) VALUES ( ?, ?, ?, 'admin@hatlystore.com', 'admin@hatlystore.com', '1', '0', '{customer_name}', 'SAL-ORD-.YYYY.-', ?, ?, 'sales', '0', 'HatlyStore', ?, ?, ?, ?, ?, ?, ?, ?, 'All Customer Groups', 'All Territories', 'EGP', '1.000000000', 'Standard Selling', 'EGP', '1.000000000', '0', 'Stores - H', '1.000000000', ?, ?, ?, ?, ?, ?, '0', '0', 'Grand Total', '0', '0', '0', ?, '0', ?, ?, '0', '0', '0', ?, 'EGP', 'en', '0', 'To Deliver and Bill', 'Not Delivered', '0', '0', 'Not Billed', '0', '0', '[\"admin@hatlystore.com\"]', '0', '0', '0', ?) RETURNING * ;",
+      [
+        orderId,
+        date,
+        date,
+        username,
+        `${userData.firstName} ${userData.lastName}`,
+        date,
+        `${userData.building} ${userData.street} st. ${userData.city} ,${userData.state}`,
+        `State: ${user.state} 
+        <br>
+        City: ${user.city}
+        <br>
+        Street: ${user.street}
+        <br>
+        Building: ${user.building}
+        <br>
+        Floor: ${user.floor}
+        <br>
+        Apartment: ${user.apartment}
+        <br>
+        Extra Data: ${user.extraDescription || ''}
+        <br>
+        Mobile Number: ${user.phone}
+        <br>
+        Email: ${user.email}
+        <br>
+        Customer Name: ${user.firstName} ${user.lastName}
+        `,
+        `${userData.firstName} ${userData.lastName}`,
+        userData.phone,
+        userData.phone,
+        userData.email,
+        `State: ${userData.state} 
+        <br>
+        City: ${userData.city}
+        <br>
+        Street: ${userData.street}
+        <br>
+        Building: ${userData.building}
+        <br>
+        Floor: ${userData.floor}
+        <br>
+        Apartment: ${userData.apartment}
+        <br>
+        Extra Data: ${userData.extraDescription || ''}
+        <br>
+        Mobile Number: ${userData.phone}
+        <br>
+        Email: ${userData.email}
+        <br>
+        Customer Name: ${userData.firstName} ${userData.lastName}
+        `,
+        totalPrice,
+        totalPrice,
+        totalPrice,
+        totalPrice,
+        delivery,
+        delivery,
+        subTotal,
+        subTotal,
+        subTotal,
+        paymentMethod,
+        subTotal,
+      ]
+    )
+    // generate orderPaymentId
+    const orderPaymentId = nanoid();
+    // add order payment
+    const [orderPayment, ...orderPaymentRest] = await db.query(
+      "INSERT INTO `tabPayment Schedule` (`name`, `modified_by`, `owner`, `docstatus`, `parent`, `parentfield`, `parenttype`, `idx`, `payment_term`, `invoice_portion`, `payment_amount`, `outstanding`, `base_payment_amount`) VALUES (?, 'admin@hatlystore.com', 'admin@hatlystore.com', '1', ? , 'payment_schedule', 'Sales Order', '1', ?, '100', ?, ?, ?) RETURNING *;"
+      ,
+      [
+        orderPaymentId,
+        orderId,
+        order[0].payment_terms_template,
+        order[0].base_grand_total,
+        order[0].base_grand_total,
+        order[0].base_grand_total,
+      ]
+    )
+    const ERPOrderedItems = []
+    for (const item of orderedItems){
+      // generate orderedItemId
+      const orderedItemId = nanoid();
+      const [[orderedItem] , ...orderedItemRest] = await db.query(
+        "INSERT INTO `tabSales Order Item` (`name`, `modified_by`, `owner`,`docstatus`,`parent`,`parentfield`, `parenttype`, `idx`,`item_code`, `ensure_delivery_based_on_produced_serial_no`, `item_name`, `item_group`, `brand`, `image`, `description`, `qty`, `conversion_factor`, `stock_qty`, `price_list_rate`, `base_price_list_rate`, `rate`, `amount`, `base_rate`, `base_amount`, `net_rate`, `net_amount`, `base_net_rate`, `base_net_amount`) VALUES (?, 'admin@hatlystore.com', 'admin@hatlystore.com', '1', ?, 'items', 'Sales Order', '1', ?, '0', ?, ?, ?, ?, ?, ?, '1', ?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;"
+        ,
+        [
+          orderedItemId ,
+          orderId,
+          item.item_code,
+          item.item_name,
+          item.item_group,
+          item.brand,
+          item.image,
+          item.description,
+          item.quantity,
+          item.projected_qty,
+          item.price_list_rate,
+          item.price_list_rate,
+          item.price_list_rate,
+          item.price_list_rate * item.quantity,
+          item.price_list_rate,
+          item.price_list_rate * item.quantity,
+          item.price_list_rate,
+          item.price_list_rate * item.quantity,
+          item.price_list_rate,
+          item.price_list_rate * item.quantity,
+
+        ]
+      )
+      ERPOrderedItems.push(orderedItem);
+    }
+      console.log(orderPayment);
+      console.log(ERPOrderedItems);
+    //INSERT INTO `_ce526a619e3f46ae`.`tabSales Order` (`name`, `creation`, `modified`, `modified_by`, `owner`, `docstatus`, `idx`, `title`, `naming_series`, `customer`, `customer_name`, `order_type`, `skip_delivery_note`, `company`, `transaction_date`, `customer_address`, `address_display`, `contact_display`, `contact_phone`, `contact_mobile`, `contact_email`, `shipping_address`, `customer_group`, `territory`, `currency`, `conversion_rate`, `selling_price_list`, `price_list_currency`, `plc_conversion_rate`, `ignore_pricing_rule`, `set_warehouse`, `total_qty`, `base_total`, `base_net_total`, `total`, `net_total`, `base_total_taxes_and_charges`, `total_taxes_and_charges`, `loyalty_points`, `loyalty_amount`, `apply_discount_on`, `base_discount_amount`, `additional_discount_percentage`, `discount_amount`, `base_grand_total`, `base_rounding_adjustment`, `base_rounded_total`, `grand_total`, `rounding_adjustment`, `rounded_total`, `advance_paid`, `payment_terms_template`, `party_account_currency`, `language`, `group_same_items`, `status`, `delivery_status`, `per_delivered`, `per_billed`, `billing_status`, `commission_rate`, `total_commission`, `_seen`, `disable_rounded_total`, `is_internal_customer`, `per_picked`, `amount_eligible_for_commission`) VALUES ('testac70a2', '2022-12-20 14:26:12.405428', '2022-12-20 14:26:12.405428', 'admin@hatlystore.com', 'admin@hatlystore.com', '1', '0', '{customer_name}', 'SAL-ORD-.YYYY.-', 'Hamed Osama_1670419225808', 'Hamed Osama', 'sales', '0', 'HatlyStore', '2022-12-29', '2b ahmed st, helwan, cairo', 'new Cairo<br>new Cairo<br>Cairo<br>', 'Hamed Osama', '01023626494', '01023626494', 'h.osama@trendlix.com', '<br><br>', 'All Customer Groups', 'All Territories', 'EGP', '1.000000000', 'Standard Selling', 'EGP', '1.000000000', '0', 'Stores - H', '1.000000000', '18500.000000000', '18500.000000000', '18500.000000000', '18500.000000000', '50.000000000', '50.000000000', '0', '0', 'Grand Total', '0', '0', '0', '18550.000000000', '0', '18550.000000000', '18550.000000000', '0', '0', '0', 'Cash', 'EGP', 'en', '0', 'To Deliver and Bill', 'Not Delivered', '0', '0', 'Not Billed', '0', '0', '[\"admin@hatlystore.com\"]', '0', '0', '0', '18550.000000000');
     res.status(201).json({
       ok: true,
       code: 200,
       message: 'succeeded',
-      body: sqlUser
+      body: order
     })
   } catch (e) {
     next(e)

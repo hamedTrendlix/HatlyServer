@@ -1,55 +1,47 @@
 const productRouter = require("express").Router();
 const db = require("../database");
 
-productRouter.get("/products", (req, res) => {
+productRouter.get("/products", async (req, res) => {
   try {
-    db.query(
+    const [rows, ...rest] = await db.query(
       "SELECT `tabItem Price`.`price_list` AS `price_list`,`tabBin`.`actual_qty` AS `actual_qty`, `tabBin`.`projected_qty` AS `projected_qty`,`tabItem`.`item_name` AS `item_name`,`tabItem`.`item_group` AS `item_group`,`tabItem`.`image` AS `image`,`tabItem`.`description` AS `description`,`tabItem`.`brand` AS `brand`,`tabItem Price`.`price_list_rate` AS `price_list_rate`,tabItem.item_code ,`tabItem Price`.name AS id FROM ((`tabItem Price` JOIN `tabBin`  ON (`tabItem Price`.`item_code` = `tabBin`.`item_code`))  JOIN `tabItem` ON (`tabItem`.`item_code` = `tabItem Price`.`item_code`)) WHERE `tabItem`.`is_sales_item` = 1 and `tabBin`.`actual_qty` > 0",
-      (err, result, fileds) => {
-        return res.send(result);
-      }
-    );
+      );
+      return res.send(rows);
   } catch (er) {
     res.send(er);
   }
 });
 
-productRouter.get("/products/:id", (req, res) => {
+productRouter.get("/products/:id", async (req, res) => {
   const id = req.params.id;
   try {
-    db.query(
+    const [rows, ...rest] = await db.query(
       "SELECT `tabItem Price`.`price_list` AS `price_list`,`tabBin`.`actual_qty` AS `actual_qty`, `tabBin`.`projected_qty` AS `projected_qty`,`tabItem`.`item_name` AS `item_name`,`tabItem`.`item_group` AS `item_group`,`tabItem`.`image` AS `image`,`tabItem`.`description` AS `description`,`tabItem`.`brand` AS `brand`,`tabItem Price`.`price_list_rate` AS `price_list_rate`,tabItem.item_code ,`tabItem Price`.name AS id FROM ((`tabItem Price` JOIN `tabBin`  ON (`tabItem Price`.`item_code` = `tabBin`.`item_code`))  JOIN `tabItem` ON (`tabItem`.`item_code` = `tabItem Price`.`item_code`)) WHERE `tabBin`.`actual_qty` > 0 and `tabItem Price`.name = '" +
       id +
       "'",
-      (err, result, fileds) => {
-        return res.send(result);
-      }
-    );
+      );
+      return res.send(rows);
   } catch (er) { }
 });
 
-productRouter.get("/products/brand/:brand", (req, res) => {
+productRouter.get("/products/brand/:brand", async (req, res) => {
   const brand = req.params.brand;
   const category = req.query.category
   if (category == undefined) {
     try {
-      db.query(
+      const [rows, ...rest] = await db.query(
         "SELECT `tabItem Price`.`price_list` AS `price_list`,`tabBin`.`actual_qty` AS `actual_qty`, `tabBin`.`projected_qty` AS `projected_qty`,`tabItem`.`item_name` AS `item_name`,`tabItem`.`item_group` AS `item_group`,`tabItem`.`image` AS `image`,`tabItem`.`description` AS `description`,`tabItem`.`brand` AS `brand`,`tabItem Price`.`price_list_rate` AS `price_list_rate`,tabItem.item_code ,`tabItem Price`.name AS id FROM ((`tabItem Price` JOIN `tabBin`  ON (`tabItem Price`.`item_code` = `tabBin`.`item_code`))  JOIN `tabItem` ON (`tabItem`.`item_code` = `tabItem Price`.`item_code`)) WHERE `tabBin`.`actual_qty` > 0 and `tabItem`.brand = '" + brand + "'",
-        (err, result, fileds) => {
-          return res.send(result);
-        }
       );
+      return res.send(rows);
     } catch (er) {
       return res.send('er');
     }
   } else {
     try {
-      db.query(
+      const [rows, ...rest] = await db.query(
         "SELECT `tabItem Price`.`price_list` AS `price_list`,`tabBin`.`actual_qty` AS `actual_qty`, `tabBin`.`projected_qty` AS `projected_qty`,`tabItem`.`item_name` AS `item_name`,`tabItem`.`item_group` AS `item_group`,`tabItem`.`image` AS `image`,`tabItem`.`description` AS `description`,`tabItem`.`brand` AS `brand`,`tabItem Price`.`price_list_rate` AS `price_list_rate`,tabItem.item_code ,`tabItem Price`.name AS id FROM ((`tabItem Price` JOIN `tabBin`  ON (`tabItem Price`.`item_code` = `tabBin`.`item_code`))  JOIN `tabItem` ON (`tabItem`.`item_code` = `tabItem Price`.`item_code`)) WHERE `tabBin`.`actual_qty` >0 and `tabItem`.brand = '" + brand + "' and `tabItem`.item_group ='" + category + "' ",
-        (err, result, fileds) => {
-          return res.send(result);
-        }
       );
+      return res.send(rows);
     } catch (er) {
       return res.send('er');
     }
@@ -57,25 +49,22 @@ productRouter.get("/products/brand/:brand", (req, res) => {
 
 });
 
-productRouter.get("/searchProduct/:name", (req, res) => {
+productRouter.get("/searchProduct/:name", async (req, res) => {
   const name = req.params.name;
   try {
 
-    db.query(
+    const [rows, ...rest] = await db.query(
       "SELECT `tabItem Price`.`price_list` AS `price_list`,`tabBin`.`actual_qty` AS `actual_qty`, `tabBin`.`projected_qty` AS `projected_qty`,`tabItem`.`item_name` AS `item_name`,`tabItem`.`item_group` AS `item_group`,`tabItem`.`image` AS `image`,`tabItem`.`description` AS `description`,`tabItem`.`brand` AS `brand`,`tabItem Price`.`price_list_rate` AS `price_list_rate`,tabItem.item_code ,`tabItem Price`.name AS id FROM ((`tabItem Price` JOIN `tabBin`  ON (`tabItem Price`.`item_code` = `tabBin`.`item_code`))  JOIN `tabItem` ON (`tabItem`.`item_code` = `tabItem Price`.`item_code`)) WHERE `tabItem`.`is_sales_item` = 1 and `tabBin`.`actual_qty` > 0 and `tabItem`.`item_name` like '%" + name + "%' LIMIT 3"
-      ,
-      (err, result, fileds) => {
-        return res.send(result);
-      }
     );
+    return res.send(rows);
   } catch (er) { return res.send('false') }
 });
 
-productRouter.put("/products/changeQuantity", (req, res) => {
+productRouter.put("/products/changeQuantity", async (req, res) => {
   const items = req.body.items;
   try {
     items.map((item, i) => {
-      db.query(
+      const [rows, ...rest] =  db.query(
         "UPDATE `tabBin` SET `actual_qty` = `actual_qty` - " +
         item.quantity +
         ", `projected_qty` = `projected_qty` -" +

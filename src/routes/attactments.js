@@ -1,14 +1,12 @@
 const attactmentsRouter = require("express").Router();
 const db = require("../database");
 
-attactmentsRouter.get("/attactments", (req, res) => {
+attactmentsRouter.get("/attactments", async (req, res) => {
     const code = req.query.code;
     try {
-        db.query("SELECT file_url FROM _ce526a619e3f46ae.tabFile where attached_to_doctype ='item' and folder='Home/Attachments' and attached_to_name ='" + code + "'",
-            (err, result, fileds) => {
-                return res.send(result);
-            }
+        const [rows , ...rest] = await  db.query("SELECT file_url FROM _ce526a619e3f46ae.tabFile where attached_to_doctype ='item' and folder='Home/Attachments' and attached_to_name ='" + code + "'",
         );
+        return res.send(rows)
     } catch (er) { }
 });
 
