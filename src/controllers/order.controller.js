@@ -29,7 +29,7 @@ const addOrder = async (req, res, next) => {
     // get current Date
     const date = new Date();
     // add order
-    const [order, ...orderRest] = await db.query(
+    const [[order], ...orderRest] = await db.query(
       "INSERT INTO `tabSales Order` (`name`, `creation`, `modified`, `modified_by`, `owner`, `docstatus`, `idx`, `title`, `naming_series`, `customer`, `customer_name`, `order_type`, `skip_delivery_note`, `company`, `transaction_date`, `customer_address`, `address_display`, `contact_display`, `contact_phone`, `contact_mobile`, `contact_email`, `shipping_address`, `customer_group`, `territory`, `currency`, `conversion_rate`, `selling_price_list`, `price_list_currency`, `plc_conversion_rate`, `ignore_pricing_rule`, `set_warehouse`, `total_qty`, `base_total`, `base_net_total`, `total`, `net_total`, `base_total_taxes_and_charges`, `total_taxes_and_charges`, `loyalty_points`, `loyalty_amount`, `apply_discount_on`, `base_discount_amount`, `additional_discount_percentage`, `discount_amount`, `base_grand_total`, `base_rounding_adjustment`, `base_rounded_total`, `grand_total`, `rounding_adjustment`, `rounded_total`, `advance_paid`, `payment_terms_template`, `party_account_currency`, `language`, `group_same_items`, `status`, `delivery_status`, `per_delivered`, `per_billed`, `billing_status`, `commission_rate`, `total_commission`, `_seen`, `disable_rounded_total`, `is_internal_customer`, `per_picked`, `amount_eligible_for_commission`) VALUES ( ?, ?, ?, 'admin@hatlystore.com', 'admin@hatlystore.com', '1', '0', '{customer_name}', 'SAL-ORD-.YYYY.-', ?, ?, 'sales', '0', 'HatlyStore', ?, ?, ?, ?, ?, ?, ?, ?, 'All Customer Groups', 'All Territories', 'EGP', '1.000000000', 'Standard Selling', 'EGP', '1.000000000', '0', 'Stores - H', '1.000000000', ?, ?, ?, ?, ?, ?, '0', '0', 'Grand Total', '0', '0', '0', ?, '0', ?, ?, '0', '0', '0', ?, 'EGP', 'en', '0', 'To Deliver and Bill', 'Not Delivered', '0', '0', 'Not Billed', '0', '0', '[\"admin@hatlystore.com\"]', '0', '0', '0', ?) RETURNING * ;",
       [
         orderId,
@@ -105,10 +105,10 @@ const addOrder = async (req, res, next) => {
       [
         orderPaymentId,
         orderId,
-        order[0].payment_terms_template,
-        order[0].base_grand_total,
-        order[0].base_grand_total,
-        order[0].base_grand_total,
+        order.payment_terms_template,
+        order.base_grand_total,
+        order.base_grand_total,
+        order.base_grand_total,
       ]
     )
     const ERPOrderedItems = []
