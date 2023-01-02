@@ -23,7 +23,7 @@ const addOrder = async (req, res, next) => {
     // get user username
     const username = erpUser[0]?.name;
     // get data from request body
-    const { userData, orderedItems, totalPrice, delivery, subTotal , paymentMethod } = req.body
+    const { userData, orderedItems, totalPrice, delivery, subTotal , paymentMethod , TransactionId } = req.body
     // generate orderId
     const orderId = nanoid();
     // get current Date
@@ -58,6 +58,7 @@ const addOrder = async (req, res, next) => {
         Email: ${user.email}
         <br>
         Customer Name: ${user.firstName} ${user.lastName}
+        ${TransactionId && `TransactionId : ${TransactionId}`}
         `,
         `${userData.firstName} ${userData.lastName}`,
         userData.phone,
@@ -82,6 +83,7 @@ const addOrder = async (req, res, next) => {
         Email: ${userData.email}
         <br>
         Customer Name: ${userData.firstName} ${userData.lastName}
+        ${TransactionId && `TransactionId : ${TransactionId}`}
         `,
         totalPrice,
         totalPrice,
