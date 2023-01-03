@@ -58,6 +58,7 @@ const addOrder = async (req, res, next) => {
         Email: ${user.email}
         <br>
         Customer Name: ${user.firstName} ${user.lastName}
+        <br>
         ${TransactionId && `TransactionId : ${TransactionId}`}
         `,
         `${userData.firstName} ${userData.lastName}`,
@@ -83,6 +84,7 @@ const addOrder = async (req, res, next) => {
         Email: ${userData.email}
         <br>
         Customer Name: ${userData.firstName} ${userData.lastName}
+        <br>
         ${TransactionId && `TransactionId : ${TransactionId}`}
         `,
         totalPrice,
