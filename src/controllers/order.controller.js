@@ -1,5 +1,6 @@
 const db = require("../database");
 const { customAlphabet } = require('nanoid');
+const ServerError = require("../utils/ErrorInterface");
 const alphabet = '0123456789';
 const nanoid = customAlphabet(alphabet, 12);
 
@@ -11,7 +12,6 @@ const nanoid = customAlphabet(alphabet, 12);
 const addOrder = async (req, res, next) => {
   try {
     const user = req.user;
-    let sqlUser;
     // const query = `SELECT * From tabCustomer WHERE tabCustomer.id = "${user.id}";`
     // const query = "SELECT * From `_ce526a619e3f46ae`.`tabCustomer` WHERE `tabCustomer`.`id` = '6390931943187d5d22a1e63e';"
     // console.log(query)
@@ -23,14 +23,14 @@ const addOrder = async (req, res, next) => {
     // get user username
     const username = erpUser[0]?.name;
     // get data from request body
-    const { userData, orderedItems, totalPrice, delivery, subTotal , paymentMethod , TransactionId } = req.body
+    const { userData, orderedItems, totalPrice, delivery, subTotal, paymentMethod, TransactionId } = req.body
     // generate orderId
     const orderId = nanoid();
     // get current Date
     const date = new Date();
     // add order
     const [[order], ...orderRest] = await db.query(
-      "INSERT INTO `tabSales Order` (`name`, `creation`, `modified`, `modified_by`, `owner`, `docstatus`, `idx`, `title`, `naming_series`, `customer`, `customer_name`, `order_type`, `skip_delivery_note`, `company`, `transaction_date`, `customer_address`, `address_display`, `contact_display`, `contact_phone`, `contact_mobile`, `contact_email`, `shipping_address`, `customer_group`, `territory`, `currency`, `conversion_rate`, `selling_price_list`, `price_list_currency`, `plc_conversion_rate`, `ignore_pricing_rule`, `set_warehouse`, `total_qty`, `base_total`, `base_net_total`, `total`, `net_total`, `base_total_taxes_and_charges`, `total_taxes_and_charges`, `loyalty_points`, `loyalty_amount`, `apply_discount_on`, `base_discount_amount`, `additional_discount_percentage`, `discount_amount`, `base_grand_total`, `base_rounding_adjustment`, `base_rounded_total`, `grand_total`, `rounding_adjustment`, `rounded_total`, `advance_paid`, `payment_terms_template`, `party_account_currency`, `language`, `group_same_items`, `status`, `delivery_status`, `per_delivered`, `per_billed`, `billing_status`, `commission_rate`, `total_commission`, `_seen`, `disable_rounded_total`, `is_internal_customer`, `per_picked`, `amount_eligible_for_commission`) VALUES ( ?, ?, ?, 'admin@hatlystore.com', 'admin@hatlystore.com', '1', '0', '{customer_name}', 'SAL-ORD-.YYYY.-', ?, ?, 'sales', '0', 'HatlyStore', ?, ?, ?, ?, ?, ?, ?, ?, 'All Customer Groups', 'All Territories', 'EGP', '1.000000000', 'Standard Selling', 'EGP', '1.000000000', '0', 'Stores - H', '1.000000000', ?, ?, ?, ?, ?, ?, '0', '0', 'Grand Total', '0', '0', '0', ?, '0', ?, ?, '0', '0', '0', ?, 'EGP', 'en', '0', 'To Deliver and Bill', 'Not Delivered', '0', '0', 'Not Billed', '0', '0', '[\"admin@hatlystore.com\"]', '0', '0', '0', ?) RETURNING * ;",
+      "INSERT INTO `tabSales Order` (`name`, `creation`, `modified`, `modified_by`, `owner`, `docstatus`, `idx`, `title`, `naming_series`, `customer`, `customer_name`, `order_type`, `skip_delivery_note`, `company`, `transaction_date`, `customer_address`, `address_display`, `contact_display`, `contact_phone`, `contact_mobile`, `contact_email`, `shipping_address`, `customer_group`, `territory`, `currency`, `conversion_rate`, `selling_price_list`, `price_list_currency`, `plc_conversion_rate`, `ignore_pricing_rule`, `set_warehouse`, `total_qty`, `base_total`, `base_net_total`, `total`, `net_total`, `base_total_taxes_and_charges`, `total_taxes_and_charges`, `loyalty_points`, `loyalty_amount`, `apply_discount_on`, `base_discount_amount`, `additional_discount_percentage`, `discount_amount`, `base_grand_total`, `base_rounding_adjustment`, `base_rounded_total`, `grand_total`, `rounding_adjustment`, `rounded_total`, `advance_paid`, `payment_terms_template`, `party_account_currency`, `language`, `group_same_items`, `status`, `delivery_status`, `per_delivered`, `per_billed`, `billing_status`, `commission_rate`, `total_commission`, `_seen`, `disable_rounded_total`, `is_internal_customer`, `per_picked`, `amount_eligible_for_commission`, `state`,`city`,`street`,`building`,`floor`,`apartment`,`extraDescription`,`paymentMethod`) VALUES ( ?, ?, ?, 'admin@hatlystore.com', 'admin@hatlystore.com', '1', '0', '{customer_name}', 'SAL-ORD-.YYYY.-', ?, ?, 'sales', '0', 'HatlyStore', ?, ?, ?, ?, ?, ?, ?, ?, 'All Customer Groups', 'All Territories', 'EGP', '1.000000000', 'Standard Selling', 'EGP', '1.000000000', '0', 'Stores - H', '1.000000000', ?, ?, ?, ?, ?, ?, '0', '0', 'Grand Total', '0', '0', '0', ?, '0', ?, ?, '0', '0', '0', ?, 'EGP', 'en', '0', 'To Deliver and Bill', 'Not Delivered', '0', '0', 'Not Billed', '0', '0', '[\"admin@hatlystore.com\"]', '0', '0', '0', ? ,? ,? ,? ,? ,? ,? ,?,?) RETURNING * ;",
       [
         orderId,
         date,
@@ -98,6 +98,14 @@ const addOrder = async (req, res, next) => {
         subTotal,
         paymentMethod,
         subTotal,
+        userData.state,
+        userData.city,
+        userData.street,
+        userData.building,
+        userData.floor,
+        userData.apartment,
+        userData.extraDescription,
+        paymentMethod === 'Cash' ? 'Cash on Delivery' : 'Online Payment'
       ]
     )
     // generate orderPaymentId
@@ -116,14 +124,14 @@ const addOrder = async (req, res, next) => {
       ]
     )
     const ERPOrderedItems = []
-    for (const item of orderedItems){
+    for (const item of orderedItems) {
       // generate orderedItemId
       const orderedItemId = nanoid();
-      const [[orderedItem] , ...orderedItemRest] = await db.query(
+      const [[orderedItem], ...orderedItemRest] = await db.query(
         "INSERT INTO `tabSales Order Item` (`name`, `modified_by`, `owner`,`docstatus`,`parent`,`parentfield`, `parenttype`, `idx`,`item_code`, `ensure_delivery_based_on_produced_serial_no`, `item_name`, `item_group`, `brand`, `image`, `description`, `qty`, `conversion_factor`, `stock_qty`, `price_list_rate`, `base_price_list_rate`, `rate`, `amount`, `base_rate`, `base_amount`, `net_rate`, `net_amount`, `base_net_rate`, `base_net_amount`) VALUES (?, 'admin@hatlystore.com', 'admin@hatlystore.com', '1', ?, 'items', 'Sales Order', '1', ?, '0', ?, ?, ?, ?, ?, ?, '1', ?, ? ,?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *;"
         ,
         [
-          orderedItemId ,
+          orderedItemId,
           orderId,
           item.item_code,
           item.item_name,
@@ -148,8 +156,8 @@ const addOrder = async (req, res, next) => {
       )
       ERPOrderedItems.push(orderedItem);
     }
-      console.log(orderPayment);
-      console.log(ERPOrderedItems);
+    console.log(orderPayment);
+    console.log(ERPOrderedItems);
     //INSERT INTO `_ce526a619e3f46ae`.`tabSales Order` (`name`, `creation`, `modified`, `modified_by`, `owner`, `docstatus`, `idx`, `title`, `naming_series`, `customer`, `customer_name`, `order_type`, `skip_delivery_note`, `company`, `transaction_date`, `customer_address`, `address_display`, `contact_display`, `contact_phone`, `contact_mobile`, `contact_email`, `shipping_address`, `customer_group`, `territory`, `currency`, `conversion_rate`, `selling_price_list`, `price_list_currency`, `plc_conversion_rate`, `ignore_pricing_rule`, `set_warehouse`, `total_qty`, `base_total`, `base_net_total`, `total`, `net_total`, `base_total_taxes_and_charges`, `total_taxes_and_charges`, `loyalty_points`, `loyalty_amount`, `apply_discount_on`, `base_discount_amount`, `additional_discount_percentage`, `discount_amount`, `base_grand_total`, `base_rounding_adjustment`, `base_rounded_total`, `grand_total`, `rounding_adjustment`, `rounded_total`, `advance_paid`, `payment_terms_template`, `party_account_currency`, `language`, `group_same_items`, `status`, `delivery_status`, `per_delivered`, `per_billed`, `billing_status`, `commission_rate`, `total_commission`, `_seen`, `disable_rounded_total`, `is_internal_customer`, `per_picked`, `amount_eligible_for_commission`) VALUES ('testac70a2', '2022-12-20 14:26:12.405428', '2022-12-20 14:26:12.405428', 'admin@hatlystore.com', 'admin@hatlystore.com', '1', '0', '{customer_name}', 'SAL-ORD-.YYYY.-', 'Hamed Osama_1670419225808', 'Hamed Osama', 'sales', '0', 'HatlyStore', '2022-12-29', '2b ahmed st, helwan, cairo', 'new Cairo<br>new Cairo<br>Cairo<br>', 'Hamed Osama', '01023626494', '01023626494', 'h.osama@trendlix.com', '<br><br>', 'All Customer Groups', 'All Territories', 'EGP', '1.000000000', 'Standard Selling', 'EGP', '1.000000000', '0', 'Stores - H', '1.000000000', '18500.000000000', '18500.000000000', '18500.000000000', '18500.000000000', '50.000000000', '50.000000000', '0', '0', 'Grand Total', '0', '0', '0', '18550.000000000', '0', '18550.000000000', '18550.000000000', '0', '0', '0', 'Cash', 'EGP', 'en', '0', 'To Deliver and Bill', 'Not Delivered', '0', '0', 'Not Billed', '0', '0', '[\"admin@hatlystore.com\"]', '0', '0', '0', '18550.000000000');
     res.status(201).json({
       ok: true,
@@ -161,4 +169,87 @@ const addOrder = async (req, res, next) => {
     next(e)
   }
 }
-module.exports = { addOrder }
+
+const getUserOrders = async (req, res, next) => {
+  try {
+    const { page, limit } = req.query;
+    const currentPage = +page || 1;
+    const currentLimit = +limit || 4;
+    const skip = (currentPage - 1) * currentLimit;
+    const user = req.user;
+    // get user from db
+    const [[erpUser], ...rest] = await db.query(
+      "SELECT * From `tabCustomer` Where `id` = ?;",
+      [user.id]
+    )
+    // get user username
+    const username = erpUser?.name;
+    const [[totalLength]] = await db.query(
+      "SELECT COUNT(*) as `orders` from `tabSales Order`  WHERE `customer` = ?",
+      [username]
+    )
+    console.log(totalLength.orders)
+    const [orders, ...ordersRest] = await db.query(
+      "select * from `tabSales Order` WHERE `customer` = ? ORDER BY creation DESC LIMIT ? OFFSET ?;",
+      [
+        username,
+        currentLimit,
+        skip
+      ]
+    )
+    for (const order of orders) {
+      const [orderItems, ...orderItemsRest] = await db.query(
+        "select * from `tabSales Order Item` WHERE `parent` = ?",
+        [order?.name]
+      )
+      order.ordersItems = orderItems;
+    }
+
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      message: 'succeeded',
+      data: orders,
+      totalLength: totalLength.orders
+    })
+  } catch (e) {
+    next(e);
+  }
+}
+const getOrder = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const user = req.user
+    if (!orderId)
+      return next(ServerError.badRequest(400, 'order id is required'));
+    // get user from db
+    const [erpUser, ...rest] = await db.query(
+      "SELECT * From `tabCustomer` Where `id` = ?;",
+      [user.id]
+    )
+    // get user username
+    const username = erpUser[0]?.name;
+    const [[order], ...orderRest] = await db.query(
+      "select * from `tabSales Order` WHERE `name` = ?;",
+      [
+        orderId,
+      ]
+    )
+    if (order.customer !== username)
+      return next(ServerError.badRequest(400, 'order not found'));
+    const [orderItems, ...orderItemsRest] = await db.query(
+      "select * from `tabSales Order Item` WHERE `parent` = ?",
+      [order?.name]
+    )
+    order.ordersItems = orderItems;
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      message: 'succeeded',
+      data: order,
+    })
+  } catch (e) {
+    next(e)
+  }
+}
+module.exports = { addOrder, getUserOrders, getOrder }
