@@ -35,7 +35,7 @@ app.use("/api/", categoryRouter);
 app.use("/api/", brandRouter);
 app.use("/api/", mailRouter);
 app.use("/api/", attactmentsRouter);
-app.use('/api/v1/' , api)
+app.use('/api/v1/' , api);
 
 app.use((req, res, next) => {
   next(ServerError.badRequest(404, 'page not found'))
