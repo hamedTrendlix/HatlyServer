@@ -18,7 +18,7 @@ const ServerError = require("./src/utils/ErrorInterface");
 dotenv.config();
 
 // connect to DB
-connectDatabase()
+connectDatabase();
 
 const app = express();
 
